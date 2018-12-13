@@ -10,7 +10,7 @@ def cameraTest():
         with  picamera.PiCamera() as cam:
                 cam.resolution = (400,300)
                 cam.start_preview()
-                time.sleep(8)
+                time.sleep(5)
                 cam.capture("testimage.jpg")
 
 if __name__ == "__main__":
