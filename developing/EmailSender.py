@@ -5,7 +5,8 @@ import sys
 class EmailSender():
     def dbg(self,*something):
         if self.debug:
-            print(*something)
+            #cannot unpack variable arguments in python2
+            print(something)
 
     def __init__(self, _address, _password, _to_addrs, _cc_addrs=None,_bcc_addrs=None):
         self.ADDRESS = _address     #email address for sending 
@@ -78,12 +79,36 @@ class EmailSender():
                 #disconnect
                 smtp_server.quit()
             return success
+    def enableTLS(self):
+        self.useTLS = True
+    def enableSSL(self):
+        self.useTLS = False
 
 if __name__ == '__main__' :
-    YourEmailAddress = ''
-    PasswordForYourEmailAddress = ''
-    DestEmailAddersses = ['']
-    sender = EmailSender(YourEmailAddress, PasswordForYourEmailAddress, DestEmailAddersses)
-    subject = 'testEmail'
-    body = 'python version : ' + str(sys.version) + '\n' + 'use TLS : ' + str(sender.useTLS) + '\n' + 'use SSL : ' + str(sender.useTLS ^ True)
-    sender.send(subject,body)
+    import os
+    import json
+    
+    emailJson = 'emailTestConfig.json'
+    if os.path.exists(emailJson):
+        with open(emailJson,'r') as f:
+            conf = json.load(f)
+            sender = EmailSender(conf['YourEmailAddress'], conf['PasswordForYourEmailAddress'], conf['DestEmailAddersses'])
+            sender.enableTLS()
+            subject = 'testEmail(TLS)'
+            body = 'python version : ' + str(sys.version) + '\n' + 'use TLS : ' + str(sender.useTLS) + '\n' + 'use SSL : ' + str(sender.useTLS ^ True)
+            if not sender.send(subject,body):
+                os.remove(emailJson)
+                print('deleted invalid json conf file')
+            else:
+                sender.enableSSL()
+                subject = 'testEmail(SSL)'
+                body = 'python version : ' + str(sys.version) + '\n' + 'use TLS : ' + str(sender.useTLS) + '\n' + 'use SSL : ' + str(sender.useTLS ^ True)
+                if not sender.send(subject,body):
+                    os.remove(emailJson)
+                    print('deleted invalid json conf file')
+
+    else:
+        print('run EmailTestConfig.py to configure email info')
+
+    
+    

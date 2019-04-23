@@ -12,7 +12,7 @@ sock0 = 0
 
 
 bufsize = 1024
-def monitoringServer(interval,ADDRESS,TO_ADDR,PASSWORD):
+def monitoringServer(interval,ADDRESS,PASSWORD,TO_ADDR):
 
         emailSender = EmailSender(ADDRESS,PASSWORD,TO_ADDR)
     
@@ -116,7 +116,6 @@ def monitoringServer(interval,ADDRESS,TO_ADDR,PASSWORD):
                             print('server:success to send email')
                         else:
                             print('server:due to an error, cannot send email')
-                        print('server:success to send email')
                         deathflag[addr] = 1
                 
 
@@ -133,15 +132,20 @@ def monitoringServer(interval,ADDRESS,TO_ADDR,PASSWORD):
                     print('server:all socket closed')
 
 if __name__ == '__main__':
-        import threading
-        INTERVAL = 5
-        ADDRESS = "YourGmailAddress@gmail.com"
-        PASSWORD = "YourGmail'sPassword"
-        TO_ADDR = ["destinationEmailAddress"]
+    import threading
+    import os
+    import json
+    INTERVAL = 5
+    emailJson = 'emailTestConfig.json'
+    if os.path.exists(emailJson):
+        with open(emailJson,'r') as f:
+            conf = json.load(f)
+            th = threading.Thread(target=monitoringServer,args=(INTERVAL,conf['YourEmailAddress'], conf['PasswordForYourEmailAddress'], conf['DestEmailAddersses']))
+            th.start()
+    else:
+        print('run EmailTestConfig.py to configure email info')
 
 
-        th = threading.Thread(target=monitoringServer,args=(INTERVAL,ADDRESS,TO_ADDR,PASSWORD))
-        th.start()
-        print('\n this is main\n')
+        
         
        
